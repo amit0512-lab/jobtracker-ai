@@ -387,9 +387,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/amit0512-lab)
-- LinkedIn: [Your LinkedIn](www.linkedin.com/in/amit-sharma-28461a249)
+- GitHub: https://github.com/amit0512-lab
+- LinkedIn: www.linkedin.com/in/amit-sharma-28461a249
 - Email: knpknp599@gmail.com
 
 ## 🙏 Acknowledgments
