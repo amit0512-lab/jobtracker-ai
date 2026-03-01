@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+
+  # ── FastAPI App ──────────────────────────────────────────
+  app:
+    build: .
+    container_name: jobtracker_app
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/jobtracker
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=change-this-in-production-use-long-random-string
+      - USE_LOCAL_STORAGE=True
+    volumes:
+      - ./local_storage:/app/local_storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── PostgreSQL ───────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: jobtracker_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jobtracker
+    ports:
+      - "5433:5432"  # External:Internal - Using 5433 to avoid conflict with local PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: jobtracker_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
