@@ -1,0 +1,119 @@
+/* Mobile Responsive Styles for JobTracker AI */
+
+/* Base responsive breakpoints */
+@media (max-width: 768px) {
+  /* Typography adjustments */
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 18px !important;
+  }
+  
+  h3 {
+    font-size: 16px !important;
+  }
+  
+  /* Grid layouts - stack on mobile */
+  .grid-4-cols {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  .grid-3-cols {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .grid-2-cols {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  /* Buttons */
+  button {
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+  
+  /* Input fields */
+  input, textarea, select {
+    font-size: 14px !important;
+  }
+  
+  /* Modals */
+  .modal-content {
+    width: 95% !important;
+    max-width: 95% !important;
+    margin: 10px !important;
+    padding: 20px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Cards */
+  .card {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+  
+  /* Spacing */
+  .container {
+    padding: 16px !important;
+  }
+  
+  .section-spacing {
+    margin-bottom: 20px !important;
+  }
+  
+  /* Tables - make scrollable */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Hide on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Show only on mobile */
+  .show-mobile {
+    display: block !important;
+  }
+}
+
+/* Tablet breakpoint */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-4-cols {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .show-mobile {
+    display: none !important;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .show-mobile {
+    display: none !important;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (max-width: 768px) {
+  button, a, input[type="checkbox"], input[type="radio"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+}
+
+/* Prevent text selection on double-tap */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+}

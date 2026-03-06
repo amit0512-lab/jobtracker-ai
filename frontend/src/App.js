@@ -11,11 +11,26 @@ import Resume from './pages/Resume';
 import Analytics from './pages/Analytics';
 import CoverLetter from './pages/CoverLetter';
 import './App.css';
+import './mobile-responsive.css';
 
 function MainLayout() {
   const [activeNav, setActiveNav] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { user } = useAuth();
+
+  // Handle window resize
+  useState(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -48,6 +63,11 @@ function MainLayout() {
           box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
         }
         select option { background: #0f1525; }
+        
+        /* Mobile responsive utilities */
+        @media (max-width: 768px) {
+          body { font-size: 14px; }
+        }
       `}</style>
 
       <div
@@ -62,55 +82,77 @@ function MainLayout() {
           overflow: 'hidden',
         }}
       >
-        {/* Background orbs */}
-        <div
-          style={{
-            position: 'fixed',
-            top: '-20%',
-            left: '-10%',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
-            borderRadius: '50%',
-            animation: 'float 12s ease-in-out infinite',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '-20%',
-            right: '-10%',
-            width: '500px',
-            height: '500px',
-            background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)',
-            borderRadius: '50%',
-            animation: 'float 15s ease-in-out infinite reverse',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-        <div
-          style={{
-            position: 'fixed',
-            top: '40%',
-            right: '20%',
-            width: '300px',
-            height: '300px',
-            background: 'radial-gradient(circle, rgba(52,211,153,0.04) 0%, transparent 70%)',
-            borderRadius: '50%',
-            animation: 'float 10s ease-in-out infinite 3s',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
+        {/* Background orbs - hidden on mobile for performance */}
+        {!isMobile && (
+          <>
+            <div
+              style={{
+                position: 'fixed',
+                top: '-20%',
+                left: '-10%',
+                width: '600px',
+                height: '600px',
+                background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
+                borderRadius: '50%',
+                animation: 'float 12s ease-in-out infinite',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+            <div
+              style={{
+                position: 'fixed',
+                bottom: '-20%',
+                right: '-10%',
+                width: '500px',
+                height: '500px',
+                background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)',
+                borderRadius: '50%',
+                animation: 'float 15s ease-in-out infinite reverse',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+            <div
+              style={{
+                position: 'fixed',
+                top: '40%',
+                right: '20%',
+                width: '300px',
+                height: '300px',
+                background: 'radial-gradient(circle, rgba(52,211,153,0.04) 0%, transparent 70%)',
+                borderRadius: '50%',
+                animation: 'float 10s ease-in-out infinite 3s',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+          </>
+        )}
+
+        {/* Mobile overlay when sidebar is open */}
+        {isMobile && sidebarOpen && (
+          <div
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.5)',
+              zIndex: 98,
+              backdropFilter: 'blur(2px)',
+            }}
+          />
+        )}
 
         <Sidebar 
           activeNav={activeNav} 
           setActiveNav={setActiveNav} 
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
+          isMobile={isMobile}
         />
 
         <div style={{ 
@@ -119,26 +161,26 @@ function MainLayout() {
           overflowY: 'auto', 
           position: 'relative', 
           zIndex: 1,
-          marginLeft: sidebarOpen ? '240px' : '0',
+          marginLeft: isMobile ? '0' : (sidebarOpen ? '240px' : '0'),
           transition: 'margin-left 0.3s ease',
-          width: sidebarOpen ? 'calc(100% - 240px)' : '100%'
+          width: isMobile ? '100%' : (sidebarOpen ? 'calc(100% - 240px)' : '100%')
         }}>
           {/* Toggle Button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             style={{
               position: 'fixed',
-              top: '20px',
-              left: sidebarOpen ? '252px' : '12px',
+              top: isMobile ? '12px' : '20px',
+              left: isMobile ? '12px' : (sidebarOpen ? '252px' : '12px'),
               zIndex: 100,
               background: 'rgba(99,102,241,0.2)',
               border: '1px solid rgba(99,102,241,0.3)',
               borderRadius: '10px',
-              width: '40px',
-              height: '40px',
+              width: isMobile ? '44px' : '40px',
+              height: isMobile ? '44px' : '40px',
               cursor: 'pointer',
               color: '#a5b4fc',
-              fontSize: '18px',
+              fontSize: isMobile ? '20px' : '18px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -154,10 +196,15 @@ function MainLayout() {
               e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
             }}
           >
-            {sidebarOpen ? '◀' : '▶'}
+            {sidebarOpen ? '◀' : '☰'}
           </button>
 
-          <div style={{ maxWidth: sidebarOpen ? '900px' : '1200px', margin: '0 auto', padding: '40px 32px', transition: 'max-width 0.3s ease' }}>
+          <div style={{ 
+            maxWidth: isMobile ? '100%' : (sidebarOpen ? '900px' : '1200px'), 
+            margin: '0 auto', 
+            padding: isMobile ? '70px 16px 20px' : '40px 32px', 
+            transition: 'max-width 0.3s ease' 
+          }}>
             {activeNav === 'dashboard' && <Dashboard />}
             {activeNav === 'jobs' && <Jobs />}
             {activeNav === 'resume' && <Resume />}

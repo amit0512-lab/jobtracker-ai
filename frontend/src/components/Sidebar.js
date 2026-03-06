@@ -1,44 +1,52 @@
 import { NAV_ITEMS } from '../constants/config';
 import { useAuth } from '../context/AuthContext';
 
-export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
+export default function Sidebar({ activeNav, setActiveNav, isOpen, onToggle, isMobile }) {
   const { user, logout } = useAuth();
+
+  const handleNavClick = (navId) => {
+    setActiveNav(navId);
+    if (isMobile && onToggle) {
+      onToggle(); // Close sidebar on mobile after selection
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
     <div
       style={{
-        width: "240px",
+        width: isMobile ? "80%" : "240px",
+        maxWidth: isMobile ? "280px" : "240px",
         flexShrink: 0,
         background: "rgba(255,255,255,0.02)",
         borderRight: "1px solid rgba(255,255,255,0.06)",
         backdropFilter: "blur(20px)",
         display: "flex",
         flexDirection: "column",
-        padding: "28px 16px",
+        padding: isMobile ? "20px 12px" : "28px 16px",
         position: "fixed",
         left: 0,
         top: 0,
         height: "100vh",
-        zIndex: 10,
+        zIndex: 99,
         animation: "fadeSlideUp 0.5s ease",
         overflowY: "auto",
       }}
     >
       {/* Logo */}
-      <div style={{ padding: "8px 16px 32px" }}>
+      <div style={{ padding: isMobile ? "8px 12px 24px" : "8px 16px 32px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div
             style={{
-              width: "38px",
-              height: "38px",
+              width: isMobile ? "34px" : "38px",
+              height: isMobile ? "34px" : "38px",
               background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
               borderRadius: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "18px",
+              fontSize: isMobile ? "16px" : "18px",
               animation: "pulse-glow 3s ease-in-out infinite",
             }}
           >
@@ -47,7 +55,7 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
           <div>
             <div
               style={{
-                fontSize: "17px",
+                fontSize: isMobile ? "15px" : "17px",
                 fontWeight: "700",
                 fontFamily: "'Playfair Display', serif",
                 letterSpacing: "-0.02em",
@@ -76,12 +84,12 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveNav(item.id)}
+              onClick={() => handleNavClick(item.id)}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
-                padding: "12px 16px",
+                padding: isMobile ? "10px 12px" : "12px 16px",
                 borderRadius: "12px",
                 border: "none",
                 cursor: "pointer",
@@ -94,8 +102,8 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
                 borderLeft: active ? "2px solid #6366f1" : "2px solid transparent",
               }}
             >
-              <span style={{ fontSize: "18px" }}>{item.icon}</span>
-              <span style={{ fontSize: "14px", fontWeight: active ? "600" : "400" }}>
+              <span style={{ fontSize: isMobile ? "16px" : "18px" }}>{item.icon}</span>
+              <span style={{ fontSize: isMobile ? "13px" : "14px", fontWeight: active ? "600" : "400" }}>
                 {item.label}
               </span>
               {active && (
@@ -120,20 +128,20 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.08)",
           borderRadius: "14px",
-          padding: "14px 16px",
+          padding: isMobile ? "12px 14px" : "14px 16px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
           <div
             style={{
-              width: "36px",
-              height: "36px",
+              width: isMobile ? "32px" : "36px",
+              height: isMobile ? "32px" : "36px",
               borderRadius: "10px",
               background: "linear-gradient(135deg, #6366f1, #34d399)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "15px",
+              fontSize: isMobile ? "13px" : "15px",
               fontWeight: "700",
               flexShrink: 0,
             }}
@@ -143,7 +151,7 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
           <div style={{ minWidth: 0, flex: 1 }}>
             <div
               style={{
-                fontSize: "13px",
+                fontSize: isMobile ? "12px" : "13px",
                 fontWeight: "600",
                 color: "#f1f5f9",
                 whiteSpace: "nowrap",
@@ -153,7 +161,13 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
             >
               {user?.full_name || "User"}
             </div>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>
+            <div style={{ 
+              fontSize: isMobile ? "10px" : "11px", 
+              color: "rgba(255,255,255,0.3)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}>
               {user?.email}
             </div>
           </div>
@@ -162,13 +176,13 @@ export default function Sidebar({ activeNav, setActiveNav, isOpen }) {
           onClick={logout}
           style={{
             width: "100%",
-            padding: "8px",
+            padding: isMobile ? "7px" : "8px",
             background: "rgba(248,113,113,0.1)",
             border: "1px solid rgba(248,113,113,0.2)",
             borderRadius: "8px",
             color: "#f87171",
             cursor: "pointer",
-            fontSize: "12px",
+            fontSize: isMobile ? "11px" : "12px",
             fontWeight: "600",
             transition: "all 0.2s",
           }}
