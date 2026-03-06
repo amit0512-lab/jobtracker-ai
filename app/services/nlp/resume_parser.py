@@ -137,24 +137,63 @@ class ResumeParser:
 
     @staticmethod
     def extract_keywords(text: str, top_n: int = 20) -> list[str]:
-        """spaCy se important keywords nikalo"""
+        """spaCy se important keywords nikalo - Improved with noise filtering"""
         doc = nlp(text)
         keywords = []
+        
+        # Words to ignore (common noise in job descriptions)
+        noise_words = {
+            'year', 'years', 'month', 'months', 'day', 'days', 'week', 'weeks',
+            'lakh', 'lakhs', 'lpa', 'ctc', 'salary', 'package', 'compensation',
+            'rupee', 'rupees', 'dollar', 'dollars', 'inr', 'usd', 'eur',
+            'minimum', 'maximum', 'range', 'between', 'approximately', 'around',
+            'company', 'role', 'position', 'job', 'work', 'candidate', 'applicant',
+            'requirement', 'requirements', 'qualification', 'qualifications',
+            'benefit', 'benefits', 'perk', 'perks', 'location', 'office',
+            'time', 'date', 'hour', 'hours', 'shift', 'schedule',
+            'number', 'amount', 'total', 'sum', 'count', 'quantity'
+        }
 
         for token in doc:
-            # Nouns aur proper nouns jo stopwords nahi hain
+            # Skip if it's a number or contains only digits
+            if token.like_num or token.text.isdigit():
+                continue
+            
+            # Skip if it's a currency symbol or number-like
+            if token.is_currency or re.match(r'^\d+[\.,]?\d*$', token.text):
+                continue
+            
+            # Skip common noise words
+            if token.lemma_.lower() in noise_words:
+                continue
+            
+            # Only keep meaningful nouns, proper nouns, and adjectives
             if (
-                token.pos_ in ["NOUN", "PROPN"]
+                token.pos_ in ["NOUN", "PROPN", "ADJ"]
                 and not token.is_stop
                 and not token.is_punct
                 and len(token.text) > 2
+                and not token.text.lower() in noise_words
             ):
-                keywords.append(token.lemma_.lower())
+                # Additional check: skip if it looks like a number with units
+                if not re.match(r'^\d+[a-z]*$', token.text.lower()):
+                    keywords.append(token.lemma_.lower())
 
         # Frequency ke hisaab se sort karo
         from collections import Counter
         freq = Counter(keywords)
-        return [word for word, _ in freq.most_common(top_n)]
+        
+        # Filter out very common words that appear too frequently (likely noise)
+        total_words = len(keywords)
+        filtered_keywords = []
+        for word, count in freq.most_common(top_n * 2):  # Get more initially
+            # Skip if word appears too frequently (>20% of text) - likely filler
+            if count / total_words < 0.2:
+                filtered_keywords.append(word)
+            if len(filtered_keywords) >= top_n:
+                break
+        
+        return filtered_keywords
 
     # ─── Experience Extract ───────────────────────────────────
 
@@ -196,6 +235,33 @@ class ResumeParser:
             experience.append({"raw": " ".join(current_block)})
 
         return experience[:5]  # Max 5 experience blocks
+
+    # ─── Extract Years of Experience ──────────────────────────
+
+    @staticmethod
+    def extract_years_of_experience(text: str) -> float:
+        """Extract total years of experience from text"""
+        text_lower = text.lower()
+        
+        # Patterns to match experience mentions
+        patterns = [
+            r'(\d+)\+?\s*(?:years?|yrs?)\s+(?:of\s+)?experience',
+            r'experience\s+(?:of\s+)?(\d+)\+?\s*(?:years?|yrs?)',
+            r'(\d+)\+?\s*(?:years?|yrs?)\s+(?:in|with)',
+            r'total\s+(?:of\s+)?(\d+)\+?\s*(?:years?|yrs?)',
+        ]
+        
+        years = []
+        for pattern in patterns:
+            matches = re.findall(pattern, text_lower)
+            for match in matches:
+                try:
+                    years.append(float(match))
+                except:
+                    pass
+        
+        # Return the maximum mentioned (most likely total experience)
+        return max(years) if years else 0.0
 
     # ─── Education Extract ────────────────────────────────────
 

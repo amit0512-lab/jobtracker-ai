@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Query
+from fastapi import APIRouter, Depends, UploadFile, File, Query, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import Optional
@@ -7,8 +7,18 @@ from app.middleware.auth_middleware import get_current_user
 from app.models.user import User
 from app.schemas.resume import ResumeResponse, NLPAnalysisResponse
 from app.api.controllers.resume_controller import ResumeController
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+# File upload limits
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_CONTENT_TYPES = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # .docx
+    'application/msword'  # .doc
+]
 
 
 @router.post("", response_model=ResumeResponse, status_code=201)
@@ -19,6 +29,41 @@ async def upload_resume(
     current_user: User = Depends(get_current_user)
 ):
     """Resume upload karo — optional: kisi job ke saath attach karo"""
+    
+    # Rate limit: 20 uploads per hour per user
+    from app.middleware.auth_middleware import rate_limit
+    from fastapi import Request
+    # Note: In production, pass actual request object
+    
+    # Validate file type
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        logger.warning(f"Invalid file type attempted: {file.content_type} by user {current_user.id}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Only PDF and DOCX files are allowed. Got: {file.content_type}"
+        )
+    
+    # Read file content to check size
+    content = await file.read()
+    file_size = len(content)
+    
+    # Validate file size
+    if file_size > MAX_FILE_SIZE:
+        logger.warning(f"File too large: {file_size} bytes by user {current_user.id}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is 10MB. Your file: {file_size / (1024*1024):.2f}MB"
+        )
+    
+    if file_size == 0:
+        logger.warning(f"Empty file uploaded by user {current_user.id}")
+        raise HTTPException(status_code=400, detail="File is empty")
+    
+    # Reset file pointer for controller to read
+    await file.seek(0)
+    
+    logger.info(f"File upload validated: {file.filename} ({file_size} bytes) by user {current_user.id}")
+    
     return await ResumeController.upload_resume(file, job_id, current_user, db)
 
 

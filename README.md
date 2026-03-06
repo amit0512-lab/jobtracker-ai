@@ -42,8 +42,17 @@
 - Automatic skill extraction (100+ tech skills)
 - Keyword identification using NLP
 - Job description matching with scoring algorithm
+- Experience matching (years of experience)
 - Missing skills identification
 - Actionable improvement suggestions
+
+### ✉️ AI Cover Letter Generator (NEW!)
+- GPT-3.5 powered personalized cover letters
+- Multiple tone options (Professional, Enthusiastic, Creative, Formal)
+- Resume + JD analysis for tailored content
+- Real-time editing and customization
+- Copy to clipboard functionality
+- Template fallback when API unavailable
 
 ### 📊 Analytics Dashboard
 - Application statistics
@@ -61,13 +70,15 @@
 - **ORM:** SQLAlchemy
 - **Migrations:** Alembic
 - **NLP:** spaCy (en_core_web_sm)
+- **AI:** OpenAI GPT-3.5 (Cover Letter Generation)
 - **Authentication:** JWT (python-jose)
 - **Password Hashing:** bcrypt
 
 ### Frontend
-- **Framework:** Streamlit
-- **Charts:** Plotly
-- **HTTP Client:** requests
+- **Framework:** React 18
+- **Styling:** Custom CSS with animations
+- **HTTP Client:** Axios
+- **Routing:** React Router v6
 
 ### DevOps
 - **Containerization:** Docker & Docker Compose
@@ -131,6 +142,7 @@ APP_NAME=JobTracker
 SECRET_KEY=your-super-secret-key-change-this
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/jobtracker
 REDIS_URL=redis://localhost:6379
+OPENAI_API_KEY=sk-your-openai-api-key-here
 ```
 
 3. **Start Docker services**
@@ -195,6 +207,17 @@ streamlit run app.py
 | GET | `/api/v1/resume` | List user's resumes |
 | POST | `/api/v1/resume/{id}/analyze` | Analyze resume vs JD |
 | DELETE | `/api/v1/resume/{id}` | Delete resume |
+
+### Cover Letter Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/cover-letter/generate` | Generate AI cover letter |
+| GET | `/api/v1/cover-letter` | List all cover letters |
+| GET | `/api/v1/cover-letter/{id}` | Get cover letter details |
+| GET | `/api/v1/cover-letter/job/{job_id}` | Get letters for specific job |
+| PATCH | `/api/v1/cover-letter/{id}` | Update cover letter |
+| DELETE | `/api/v1/cover-letter/{id}` | Delete cover letter |
 
 ### Analytics Endpoints
 
@@ -387,8 +410,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-- GitHub: https://github.com/amit0512-lab
-- LinkedIn: www.linkedin.com/in/amit-sharma-28461a249
+**Amit Sharma**
+- GitHub: [@amit0512-lab](https://github.com/amit0512-lab)
+- LinkedIn: [Amit Sharma](https://www.linkedin.com/in/amit-sharma-28461a249)
 - Email: knpknp599@gmail.com
 
 ## 🙏 Acknowledgments

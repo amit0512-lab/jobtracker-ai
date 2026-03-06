@@ -50,6 +50,7 @@ class Job(Base):
     # Relationships
     user = relationship("User", back_populates="jobs")
     resumes = relationship("Resume", back_populates="job")
+    cover_letters = relationship("CoverLetter", back_populates="job", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Job {self.title} @ {self.company}>"

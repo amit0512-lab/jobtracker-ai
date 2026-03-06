@@ -13,6 +13,11 @@ from app.core.security import (
     is_token_blacklisted
 )
 from app.core.config import settings
+from app.services.email_service import EmailService
+from app.core.redis import get_redis
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AuthController:
@@ -20,50 +25,85 @@ class AuthController:
     # ─── Register ─────────────────────────────────────────────
 
     @staticmethod
-    async def register(data: RegisterRequest, db: Session) -> UserResponse:
+    async def register(data: RegisterRequest, db: Session) -> dict:
 
-        # Email already exist karta hai?
+        # Check if email already exists
         existing = db.query(User).filter(User.email == data.email).first()
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Is email se account pehle se exist karta hai"
+                detail="An account with this email already exists"
             )
 
-        # User banao
+        # Create user (DEVELOPMENT MODE: auto-verified)
         user = User(
             email=data.email,
             full_name=data.full_name,
-            hashed_password=hash_password(data.password)
+            hashed_password=hash_password(data.password),
+            is_verified=True  # DEVELOPMENT: Skip email verification
         )
         db.add(user)
         db.commit()
         db.refresh(user)
+        
+        # DEVELOPMENT MODE: OTP verification disabled
+        # Uncomment below for production email verification
+        
+        # # Generate and send OTP
+        # otp = EmailService.generate_otp()
+        # 
+        # # Store OTP in Redis (10 minutes expiry)
+        # r = get_redis()
+        # otp_key = f"otp:{user.email}"
+        # await r.set(otp_key, otp, ex=600)
+        # 
+        # # Send OTP email
+        # try:
+        #     await EmailService.send_verification_otp(user.email, otp, user.full_name)
+        #     logger.info(f"Registration successful for {user.email}. OTP sent.")
+        # except Exception as e:
+        #     logger.error(f"Failed to send OTP email: {str(e)}")
+        #     # Don't fail registration - user can request OTP again
 
-        return UserResponse.model_validate(user)
+        return {
+            "message": "Registration successful! You can now login.",
+            "email": user.email,
+            "is_verified": True,
+            "user": UserResponse.model_validate(user)
+        }
 
     # ─── Login ────────────────────────────────────────────────
 
     @staticmethod
     async def login(data: LoginRequest, db: Session) -> TokenResponse:
 
-        # User fetch karo
+        # Fetch user from database
         user = db.query(User).filter(User.email == data.email).first()
 
-        # Email ya password galat
+        # Check email and password
         if not user or not verify_password(data.password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email ya password galat hai"
+                detail="Incorrect email or password"
             )
 
         if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account deactivated hai"
+                detail="Account is deactivated"
             )
+        
+        # DEVELOPMENT MODE: Email verification check disabled
+        # Uncomment below for production email verification
+        
+        # # Check if email is verified
+        # if not user.is_verified:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail="Email not verified. Please verify your email first."
+        #     )
 
-        # Tokens banao
+        # Create tokens
         token_data = {"sub": str(user.id), "email": user.email}
         access_token = create_access_token(token_data)
         refresh_token = create_refresh_token(token_data)
@@ -78,14 +118,14 @@ class AuthController:
     @staticmethod
     async def refresh_token(refresh_token: str, db: Session) -> TokenResponse:
 
-        # Blacklisted hai?
+        # Check if blacklisted
         if await is_token_blacklisted(refresh_token):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token invalid hai, dobara login karo"
+                detail="Token is invalid, please login again"
             )
 
-        # Decode karo
+        # Decode token
         payload = decode_token(refresh_token)
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(
@@ -93,22 +133,22 @@ class AuthController:
                 detail="Invalid refresh token"
             )
 
-        # User exist karta hai?
+        # Check if user exists
         from uuid import UUID
         user = db.query(User).filter(User.id == UUID(payload["sub"])).first()
         if not user or not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User nahi mila"
+                detail="User not found"
             )
 
-        # Purana refresh token blacklist karo
+        # Blacklist old refresh token
         exp = payload.get("exp")
         remaining = exp - int(datetime.now(timezone.utc).timestamp())
         if remaining > 0:
             await blacklist_token(refresh_token, remaining)
 
-        # Naye tokens banao
+        # Create new tokens
         token_data = {"sub": str(user.id), "email": user.email}
         return TokenResponse(
             access_token=create_access_token(token_data),
@@ -124,9 +164,9 @@ class AuthController:
             exp = payload.get("exp")
             remaining = exp - int(datetime.now(timezone.utc).timestamp())
             if remaining > 0:
-                await blacklist_token(token, remaining)  # token blacklist ho gaya
+                await blacklist_token(token, remaining)  # Blacklist the token
 
-        return {"message": f"{user.full_name}, aap logout ho gaye hain"}
+        return {"message": f"{user.full_name}, you have been logged out successfully"}
 
     # ─── Me (Profile) ─────────────────────────────────────────
 

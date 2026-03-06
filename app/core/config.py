@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     AWS_BUCKET_NAME: str = "jobtracker-bucket"
     AWS_REGION: str = "ap-south-1"
 
+    # AI
+    OPENAI_API_KEY: str = "your-openai-api-key-here"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

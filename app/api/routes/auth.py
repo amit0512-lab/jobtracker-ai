@@ -14,12 +14,12 @@ router = APIRouter()
 bearer_scheme = HTTPBearer()
 
 
-@router.post("/register", response_model=UserResponse, status_code=201)
+@router.post("/register", status_code=201)
 async def register(
     data: RegisterRequest,
     db: Session = Depends(get_db)
 ):
-    """Naya account banao"""
+    """Create new account with email verification"""
     return await AuthController.register(data, db)
 
 
@@ -29,7 +29,7 @@ async def login(
     data: LoginRequest,
     db: Session = Depends(get_db)
 ):
-    """Login karo — access + refresh token milega"""
+    """Login - returns access + refresh token"""
     # Rate limit: 5 login attempts per minute
     await rate_limit(request, max_requests=5, window=60)
     return await AuthController.login(data, db)
@@ -40,7 +40,7 @@ async def refresh(
     data: RefreshRequest,
     db: Session = Depends(get_db)
 ):
-    """Access token expire hone pe refresh karo"""
+    """Refresh access token when expired"""
     return await AuthController.refresh_token(data.refresh_token, db)
 
 
@@ -49,7 +49,7 @@ async def logout(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     current_user: User = Depends(get_current_user)
 ):
-    """Logout — token blacklist ho jayega"""
+    """Logout - token will be blacklisted"""
     return await AuthController.logout(credentials.credentials, current_user)
 
 
@@ -57,5 +57,5 @@ async def logout(
 async def get_profile(
     current_user: User = Depends(get_current_user)
 ):
-    """Apna profile dekho"""
+    """Get your profile"""
     return await AuthController.get_profile(current_user)

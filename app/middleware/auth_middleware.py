@@ -16,19 +16,19 @@ async def get_current_user(
     db: Session = Depends(get_db)
 ) -> User:
     """
-    Protected routes pe inject karo — current logged in user milega.
+    Inject into protected routes to get the current logged-in user.
     Usage: user: User = Depends(get_current_user)
     """
     token = credentials.credentials
 
-    # 1. Token blacklisted hai? (logout ho chuka)
+    # 1. Check if token is blacklisted (user logged out)
     if await is_token_blacklisted(token):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token invalid hai, dobara login karo"
+            detail="Token is invalid, please login again"
         )
 
-    # 2. Token decode karo
+    # 2. Decode the token
     payload = decode_token(token)
     if not payload or payload.get("type") != "access":
         raise HTTPException(
@@ -36,25 +36,25 @@ async def get_current_user(
             detail="Invalid token"
         )
 
-    # 3. User fetch karo
+    # 3. Fetch the user from database
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token mein user ID nahi mili"
+            detail="User ID not found in token"
         )
 
     user = db.query(User).filter(User.id == UUID(user_id)).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User nahi mila"
+            detail="User not found"
         )
 
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account deactivated hai"
+            detail="Account is deactivated"
         )
 
     return user
@@ -62,8 +62,8 @@ async def get_current_user(
 
 async def rate_limit(request: Request, max_requests: int = 60, window: int = 60):
     """
-    Per-IP rate limiting — 60 requests per minute by default
-    Login route pe 5 requests per minute use karo
+    Per-IP rate limiting - 60 requests per minute by default
+    Use 5 requests per minute for login route
     """
     client_ip = request.client.host
     key = f"ratelimit:{client_ip}:{request.url.path}"
@@ -71,10 +71,10 @@ async def rate_limit(request: Request, max_requests: int = 60, window: int = 60)
 
     current = await r.incr(key)
     if current == 1:
-        await r.expire(key, window)  # pehli request pe expiry set karo
+        await r.expire(key, window)  # Set expiry on first request
 
     if current > max_requests:
         raise HTTPException(
             status_code=429,
-            detail=f"Bahut zyada requests. {window} seconds baad try karo."
+            detail=f"Too many requests. Please try again after {window} seconds."
         )
