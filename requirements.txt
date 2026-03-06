@@ -15,8 +15,8 @@ python-jose[cryptography]==3.3.0
 bcrypt==4.1.2
 python-multipart==0.0.9
 
-# NLP
-spacy==3.7.4
+# NLP (optional - can be added later if needed)
+# spacy==3.7.4
 
 # File Processing
 pypdf==4.0.0
