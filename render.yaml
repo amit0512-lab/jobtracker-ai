@@ -1,0 +1,55 @@
+services:
+  # Backend API Service
+  - type: web
+    name: jobtracker-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: APP_NAME
+        value: JobTracker
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: 7
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jobtracker-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: jobtracker-redis
+          property: connectionString
+      - key: USE_LOCAL_STORAGE
+        value: true
+      - key: ALLOWED_ORIGINS
+        value: https://jobtracker-ai.vercel.app,http://localhost:3000
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in dashboard
+
+databases:
+  # PostgreSQL Database
+  - name: jobtracker-db
+    databaseName: jobtracker
+    user: jobtracker_user
+    plan: free
+    region: oregon
+
+  # Redis Cache
+  - name: jobtracker-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
