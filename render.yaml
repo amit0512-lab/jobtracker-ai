@@ -52,4 +52,3 @@ databases:
   - name: jobtracker-redis
     plan: free
     region: oregon
-    maxmemoryPolicy: allkeys-lru
