@@ -1,6 +1,5 @@
 import re
-import spacy
-from app.services.nlp.resume_parser import ResumeParser, ALL_SKILLS, nlp
+from app.services.nlp.resume_parser import ResumeParser, ALL_SKILLS, nlp, SPACY_AVAILABLE
 
 
 class JDMatcher:

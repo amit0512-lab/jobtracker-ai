@@ -1,12 +1,15 @@
-import spacy
+# Try to import spacy, but make it optional for deployment
+try:
+    import spacy
+    nlp = spacy.load("en_core_web_sm")
+    SPACY_AVAILABLE = True
+except (ImportError, OSError):
+    # Spacy not available - use fallback keyword extraction
+    nlp = None
+    SPACY_AVAILABLE = False
+
 import re
 from pathlib import Path
-
-# Model load karo — ek baar hi load hoga
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    raise RuntimeError("spaCy model nahi mila. Run: python -m spacy download en_core_web_sm")
 
 
 # ─── Common Tech Skills Dictionary ────────────────────────────
