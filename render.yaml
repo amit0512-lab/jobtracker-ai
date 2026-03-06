@@ -29,10 +29,7 @@ services:
           name: jobtracker-db
           property: connectionString
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: jobtracker-redis
-          property: connectionString
+        value: redis://localhost:6379  # Placeholder - Redis optional
       - key: USE_LOCAL_STORAGE
         value: true
       - key: ALLOWED_ORIGINS
@@ -45,10 +42,5 @@ databases:
   - name: jobtracker-db
     databaseName: jobtracker
     user: jobtracker_user
-    plan: free
-    region: oregon
-
-  # Redis Cache
-  - name: jobtracker-redis
     plan: free
     region: oregon
