@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { jobsAPI } from "../services/api";
 import StatCard from "../components/StatCard";
 import { STATUS_CONFIG } from "../constants/config";
+import { TopBannerAd, InFeedAd } from "../components/AdBanner";
 
 export default function Dashboard() {
   const [jobs, setJobs] = useState([]);
@@ -67,6 +68,8 @@ export default function Dashboard() {
         </p>
       </div>
 
+      <TopBannerAd />
+
       <div
         style={{
           display: "grid",
@@ -86,6 +89,8 @@ export default function Dashboard() {
         />
         <StatCard value={stats.offer} label="Offers" color="#34d399" icon="⬡" delay={0.3} />
       </div>
+
+      <InFeedAd />
 
       <div
         style={{

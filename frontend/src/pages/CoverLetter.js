@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { coverLetterAPI, jobsAPI, resumeAPI } from "../services/api";
 import { TONE_CONFIG } from "../constants/config";
+import { TopBannerAd, InFeedAd } from "../components/AdBanner";
 
 export default function CoverLetter() {
   const [coverLetters, setCoverLetters] = useState([]);
@@ -224,6 +225,8 @@ export default function CoverLetter() {
           ✦ Generate New
         </button>
       </div>
+
+      <TopBannerAd />
 
       {/* Generator Modal */}
       {showGenerator && (
@@ -491,40 +494,77 @@ export default function CoverLetter() {
               No cover letters yet. Generate your first one!
             </div>
           ) : (
-            coverLetters.map((cl) => (
-              <div
-                key={cl.id}
-                onClick={() => handleView(cl.id)}
-                style={{
-                  padding: "16px",
-                  background: selectedLetter?.id === cl.id ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.02)",
-                  border: `1px solid ${selectedLetter?.id === cl.id ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`,
-                  borderRadius: "14px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-              >
-                <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "4px" }}>{cl.job_title}</div>
-                <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "8px" }}>
-                  {cl.company}
+            <>
+              {coverLetters.slice(0, 2).map((cl) => (
+                <div
+                  key={cl.id}
+                  onClick={() => handleView(cl.id)}
+                  style={{
+                    padding: "16px",
+                    background: selectedLetter?.id === cl.id ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.02)",
+                    border: `1px solid ${selectedLetter?.id === cl.id ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: "14px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "4px" }}>{cl.job_title}</div>
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "8px" }}>
+                    {cl.company}
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        background: TONE_CONFIG[cl.tone]?.color + "20",
+                        color: TONE_CONFIG[cl.tone]?.color,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {TONE_CONFIG[cl.tone]?.label}
+                    </span>
+                    <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>{cl.word_count} words</span>
+                  </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                      background: TONE_CONFIG[cl.tone]?.color + "20",
-                      color: TONE_CONFIG[cl.tone]?.color,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {TONE_CONFIG[cl.tone]?.label}
-                  </span>
-                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>{cl.word_count} words</span>
+              ))}
+              {coverLetters.length > 2 && <InFeedAd />}
+              {coverLetters.slice(2).map((cl) => (
+                <div
+                  key={cl.id}
+                  onClick={() => handleView(cl.id)}
+                  style={{
+                    padding: "16px",
+                    background: selectedLetter?.id === cl.id ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.02)",
+                    border: `1px solid ${selectedLetter?.id === cl.id ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: "14px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "4px" }}>{cl.job_title}</div>
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "8px" }}>
+                    {cl.company}
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        background: TONE_CONFIG[cl.tone]?.color + "20",
+                        color: TONE_CONFIG[cl.tone]?.color,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {TONE_CONFIG[cl.tone]?.label}
+                    </span>
+                    <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>{cl.word_count} words</span>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           )}
         </div>
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { resumeAPI, jobsAPI } from "../services/api";
+import { TopBannerAd, InFeedAd } from "../components/AdBanner";
 
 export default function Resume() {
   const [resumes, setResumes] = useState([]);
@@ -117,6 +118,8 @@ export default function Resume() {
       <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px", marginBottom: "32px" }}>
         Upload resumes and match against job descriptions
       </p>
+
+      <TopBannerAd />
 
       <label
         style={{
@@ -312,6 +315,13 @@ export default function Resume() {
             </div>
           )}
         </div>
+
+        {/* Ad between list and results */}
+        {!analysisResult && resumes.length > 0 && (
+          <div style={{ gridColumn: "1/-1" }}>
+            <InFeedAd />
+          </div>
+        )}
 
         {/* Analysis Results */}
         {analysisResult && (

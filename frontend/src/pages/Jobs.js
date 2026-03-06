@@ -3,6 +3,7 @@ import { jobsAPI } from "../services/api";
 import JobCard from "../components/JobCard";
 import AddJobModal from "../components/AddJobModal";
 import { STATUS_CONFIG } from "../constants/config";
+import { TopBannerAd, InFeedAd } from "../components/AdBanner";
 
 export default function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -201,21 +202,35 @@ export default function Jobs() {
           </div>
         </div>
 
+        <TopBannerAd />
+
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {filteredJobs.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px", color: "rgba(255,255,255,0.3)" }}>
               No jobs found. Try adjusting filters.
             </div>
           ) : (
-            filteredJobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onDelete={handleDelete}
-                onStatusChange={handleStatusChange}
-                onEdit={openEditModal}
-              />
-            ))
+            <>
+              {filteredJobs.slice(0, 3).map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onDelete={handleDelete}
+                  onStatusChange={handleStatusChange}
+                  onEdit={openEditModal}
+                />
+              ))}
+              {filteredJobs.length > 3 && <InFeedAd />}
+              {filteredJobs.slice(3).map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onDelete={handleDelete}
+                  onStatusChange={handleStatusChange}
+                  onEdit={openEditModal}
+                />
+              ))}
+            </>
           )}
         </div>
       </div>

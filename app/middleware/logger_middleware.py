@@ -14,15 +14,15 @@ class LoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
 
-        # Request log
-        logger.info(f"➡️  {request.method} {request.url.path} | IP: {request.client.host}")
+        # Request log (removed emojis for Windows compatibility)
+        logger.info(f">> {request.method} {request.url.path} | IP: {request.client.host}")
 
         response = await call_next(request)
 
-        # Response log
+        # Response log (removed emojis for Windows compatibility)
         duration = round((time.time() - start_time) * 1000, 2)
         logger.info(
-            f"✅ {request.method} {request.url.path} "
+            f"<< {request.method} {request.url.path} "
             f"| Status: {response.status_code} "
             f"| Time: {duration}ms"
         )

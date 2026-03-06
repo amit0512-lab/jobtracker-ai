@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { analyticsAPI } from "../services/api";
 import { STATUS_CONFIG, PRIORITY_CONFIG } from "../constants/config";
+import { TopBannerAd, InFeedAd } from "../components/AdBanner";
 
 export default function Analytics() {
   const [data, setData] = useState(null);
@@ -66,6 +67,8 @@ export default function Analytics() {
       <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px", marginBottom: "32px" }}>
         Track your job search performance
       </p>
+
+      <TopBannerAd />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
         {/* Status Breakdown */}
@@ -192,6 +195,11 @@ export default function Analytics() {
               );
             })}
           </div>
+        </div>
+
+        {/* Ad between sections */}
+        <div style={{ gridColumn: "1/-1" }}>
+          <InFeedAd />
         </div>
 
         {/* Application Funnel */}

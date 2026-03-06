@@ -18,15 +18,15 @@ logger.info(f"Starting {settings.APP_NAME} v1.0.0")
 logger.info(f"Environment: {settings.APP_ENV}")
 logger.info(f"Debug mode: {settings.DEBUG}")
 
-# CORS - IMPORTANT: Update for production!
-# For development: allows localhost
-# For production: MUST change to your actual domain
+# CORS - Production ready
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # React dev server
         "http://localhost:8000",  # Backend
-        # TODO: Add your production frontend URL here
+        "https://*.vercel.app",   # Vercel deployments
+        "https://*.onrender.com", # Render deployments
+        # Add your custom domain when you get one:
         # "https://yourdomain.com",
         # "https://www.yourdomain.com"
     ],
